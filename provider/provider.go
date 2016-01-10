@@ -1,6 +1,7 @@
 package provider
 
 import "github.com/LunaNode/cloug/provider/digitalocean"
+import "github.com/LunaNode/cloug/provider/lunanode"
 import "github.com/LunaNode/cloug/provider/openstack"
 import "github.com/LunaNode/cloug/service/compute"
 
@@ -35,7 +36,9 @@ type ComputeConfig struct {
 
 func ComputeProviderFromConfig(cfg *ComputeConfig) (compute.Provider, error) {
 	if cfg.Provider == "openstack" {
-		return openstack.MakeOpenStack(cfg.URL, cfg.Username, cfg.Password, cfg.Tenant), nil
+		return openstack.MakeOpenStack(cfg.URL, cfg.Username, cfg.Password, cfg.Tenant)
+	} else if cfg.Provider == "lunanode" {
+		return lunanode.MakeLunaNode(cfg.ApiID, cfg.ApiKey)
 	} else if cfg.Provider == "digitalocean" {
 		return digitalocean.MakeDigitalOcean(cfg.ApiID), nil
 	} else {

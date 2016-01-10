@@ -15,3 +15,16 @@ func Uid(l int) string {
 	}
 	return string(str)
 }
+
+func IsSliceSubset(set []string, subset []string) bool {
+	setMap := make(map[string]bool)
+	for _, str := range set {
+		setMap[str] = true
+	}
+	for _, str := range subset {
+		if !setMap[str] {
+			return false
+		}
+	}
+	return true
+}

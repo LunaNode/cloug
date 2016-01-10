@@ -26,7 +26,7 @@ type OpenStack struct {
 	ImageClient   *gophercloud.ServiceClient
 }
 
-func MakeOpenStack(identityEndpoint string, username string, password string, tenantName string) *OpenStack {
+func MakeOpenStack(identityEndpoint string, username string, password string, tenantName string) (*OpenStack, error) {
 	os := new(OpenStack)
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: identityEndpoint,
@@ -36,17 +36,17 @@ func MakeOpenStack(identityEndpoint string, username string, password string, te
 	}
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("openstack authentication error: %v", err)
 	}
 	os.ComputeClient, err = openstack.NewComputeV2(provider, gophercloud.EndpointOpts{})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("compute client initialization error: %v", err)
 	}
 	os.ImageClient, err = openstack.NewImageV1(provider, gophercloud.EndpointOpts{})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("image client initialization error: %v", err)
 	}
-	return os
+	return os, nil
 }
 
 func (os *OpenStack) ComputeService() compute.Service {
