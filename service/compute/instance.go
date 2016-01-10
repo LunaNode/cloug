@@ -23,6 +23,9 @@ type Instance struct {
 	// Bytes of bandwidth used.
 	BandwidthUsed int64
 
+	// Tenant network ID.
+	NetworkID string
+
 	// Key-value additional details of the instance.
 	Details map[string]string
 }

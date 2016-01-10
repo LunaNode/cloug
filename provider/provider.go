@@ -1,6 +1,7 @@
 package provider
 
 import "github.com/LunaNode/cloug/provider/digitalocean"
+import "github.com/LunaNode/cloug/provider/openstack"
 import "github.com/LunaNode/cloug/service/compute"
 
 import "encoding/json"
@@ -16,9 +17,6 @@ type ComputeConfig struct {
 
 	// URL (used by solusvm, lobster, openstack, cloudstack)
 	URL string `json:"url"`
-
-	// network ID (used by openstack, cloudstack)
-	NetworkID string `json:"network_id"`
 
 	// solusvm options
 	VirtType  string `json:"virt_type"`
@@ -36,7 +34,9 @@ type ComputeConfig struct {
 }
 
 func ComputeProviderFromConfig(cfg *ComputeConfig) (compute.Provider, error) {
-	if cfg.Provider == "digitalocean" {
+	if cfg.Provider == "openstack" {
+		return openstack.MakeOpenStack(cfg.URL, cfg.Username, cfg.Password, cfg.Tenant), nil
+	} else if cfg.Provider == "digitalocean" {
 		return digitalocean.MakeDigitalOcean(cfg.ApiID), nil
 	} else {
 		return nil, fmt.Errorf("invalid provider type %s", cfg.Provider)

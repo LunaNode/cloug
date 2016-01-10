@@ -1,5 +1,6 @@
 package digitalocean
 
+import "github.com/LunaNode/cloug/provider/common"
 import "github.com/LunaNode/cloug/service/compute"
 import "github.com/LunaNode/cloug/utils"
 
@@ -126,16 +127,9 @@ func (do *DigitalOcean) CreateInstance(instance *compute.Instance) (*compute.Ins
 		return nil, err
 	}
 
-	var flavorID string
-	if instance.Flavor.ID == "" {
-		flavorID, err = do.FindFlavor(&instance.Flavor)
-		if err != nil {
-			return nil, fmt.Errorf("error finding flavor: %v", err)
-		} else if flavorID == "" {
-			return nil, fmt.Errorf("no matching flavor found")
-		}
-	} else {
-		flavorID = instance.Flavor.ID
+	flavorID, err := common.GetMatchingFlavorID(do, &instance.Flavor)
+	if err != nil {
+		return nil, err
 	}
 
 	password := instance.Password
@@ -281,18 +275,9 @@ func (do *DigitalOcean) ReimageInstance(instanceID string, image *compute.Image)
 }
 
 func (do *DigitalOcean) ResizeInstance(instanceID string, flavor *compute.Flavor) error {
-	var err error
-	var flavorID string
-
-	if flavor.ID == "" {
-		flavorID, err = do.FindFlavor(flavor)
-		if err != nil {
-			return fmt.Errorf("error finding flavor: %v", err)
-		} else if flavorID == "" {
-			return fmt.Errorf("no matching flavor found")
-		}
-	} else {
-		flavorID = flavor.ID
+	flavorID, err := common.GetMatchingFlavorID(do, flavor)
+	if err != nil {
+		return err
 	}
 
 	return do.doAction(instanceID, func(id int) (*godo.Action, *godo.Response, error) {
