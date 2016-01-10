@@ -31,6 +31,20 @@ func IsPrivate(ipString string) bool {
 	return false
 }
 
+// Returns the IP version of the specified IP address (e.g. 4 for IPv4, 6 for IPv6),
+//  or 0 if the address is invalid.
+func GetIPVersion(ipString string) int {
+	ip := net.ParseIP(ipString)
+	if ip == nil {
+		return 0
+	}
+	if ip.To4() != nil {
+		return 4
+	} else {
+		return 6
+	}
+}
+
 func ParseCIDROrIP(s string) *net.IPNet {
 	// first try as network
 	_, network, err := net.ParseCIDR(s)

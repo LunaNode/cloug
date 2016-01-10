@@ -80,10 +80,10 @@ func (os *OpenStack) serverToInstance(server *servers.Server) *compute.Instance 
 		for _, networkAddresses := range addresses {
 			for _, addr := range networkAddresses {
 				if utils.IsPrivate(addr.Address) {
-					if instance.PrivateIP == "" {
+					if instance.PrivateIP == "" || (utils.GetIPVersion(addr.Address) == 4 && utils.GetIPVersion(instance.PrivateIP) != 4) {
 						instance.PrivateIP = addr.Address
 					}
-				} else if instance.IP == "" {
+				} else if instance.IP == "" || (utils.GetIPVersion(addr.Address) == 4 && utils.GetIPVersion(instance.IP) != 4) {
 					instance.IP = addr.Address
 				}
 			}
