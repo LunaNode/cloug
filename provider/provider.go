@@ -1,5 +1,6 @@
 package provider
 
+import "github.com/LunaNode/cloug/provider/cloudstack"
 import "github.com/LunaNode/cloug/provider/digitalocean"
 import "github.com/LunaNode/cloug/provider/lunanode"
 import "github.com/LunaNode/cloug/provider/openstack"
@@ -13,6 +14,7 @@ type ProviderJSONFunc func(jsonData []byte) (compute.Provider, error)
 
 var providerJSONFuncs map[string]ProviderJSONFunc = map[string]ProviderJSONFunc{
 	"openstack":    openstack.OpenStackFromJSON,
+	"cloudstack":   cloudstack.CloudStackFromJSON,
 	"proxmox":      proxmox.ProxmoxFromJSON,
 	"lunanode":     lunanode.LunaNodeFromJSON,
 	"digitalocean": digitalocean.DigitalOceanFromJSON,
