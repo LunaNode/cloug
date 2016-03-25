@@ -2,6 +2,7 @@ package provider
 
 import "github.com/LunaNode/cloug/provider/cloudstack"
 import "github.com/LunaNode/cloug/provider/digitalocean"
+import "github.com/LunaNode/cloug/provider/ec2"
 import "github.com/LunaNode/cloug/provider/lunanode"
 import "github.com/LunaNode/cloug/provider/openstack"
 import "github.com/LunaNode/cloug/provider/proxmox"
@@ -17,6 +18,7 @@ var providerJSONFuncs map[string]ProviderJSONFunc = map[string]ProviderJSONFunc{
 	"cloudstack":   cloudstack.CloudStackFromJSON,
 	"proxmox":      proxmox.ProxmoxFromJSON,
 	"lunanode":     lunanode.LunaNodeFromJSON,
+	"ec2":          ec2.EC2FromJSON,
 	"digitalocean": digitalocean.DigitalOceanFromJSON,
 }
 
