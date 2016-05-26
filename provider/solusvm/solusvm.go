@@ -67,6 +67,9 @@ func (solus *SolusVM) CreateInstance(instance *compute.Instance) (*compute.Insta
 
 	if instance.Name != "" {
 		name = instance.Name
+		if len(name) < 4 {
+			name += ".cloug"
+		}
 	}
 	if instance.Flavor.MemoryMB != 0 {
 		ram = instance.Flavor.MemoryMB
