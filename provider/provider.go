@@ -3,6 +3,7 @@ package provider
 import "github.com/LunaNode/cloug/provider/cloudstack"
 import "github.com/LunaNode/cloug/provider/digitalocean"
 import "github.com/LunaNode/cloug/provider/ec2"
+import "github.com/LunaNode/cloug/provider/linode"
 import "github.com/LunaNode/cloug/provider/lobster"
 import "github.com/LunaNode/cloug/provider/lunanode"
 import "github.com/LunaNode/cloug/provider/openstack"
@@ -24,6 +25,7 @@ var providerJSONFuncs map[string]ProviderJSONFunc = map[string]ProviderJSONFunc{
 	"lobster":      lobster.LobsterFromJSON,
 	"ec2":          ec2.EC2FromJSON,
 	"digitalocean": digitalocean.DigitalOceanFromJSON,
+	"linode": linode.LinodeFromJSON,
 }
 
 type ComputeConfig struct {
