@@ -28,6 +28,9 @@ type Instance struct {
 
 	// Key-value additional details of the instance.
 	Details map[string]string
+
+	// Additional custom actions supported for this instance.
+	Actions []InstanceAction
 }
 
 type InstanceStatus string
@@ -36,3 +39,14 @@ const (
 	StatusOnline  InstanceStatus = "online"
 	StatusOffline InstanceStatus = "offline"
 )
+
+type InstanceAction struct {
+	Label       string
+	Description string
+
+	// map of options from option value to description
+	// if nil, then this action can take any string value
+	Options     map[string]string
+
+	Func func(string) error
+}

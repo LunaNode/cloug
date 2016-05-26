@@ -7,6 +7,7 @@ import "github.com/LunaNode/cloug/provider/lobster"
 import "github.com/LunaNode/cloug/provider/lunanode"
 import "github.com/LunaNode/cloug/provider/openstack"
 import "github.com/LunaNode/cloug/provider/proxmox"
+import "github.com/LunaNode/cloug/provider/solusvm"
 import "github.com/LunaNode/cloug/service/compute"
 
 import "encoding/json"
@@ -18,6 +19,7 @@ var providerJSONFuncs map[string]ProviderJSONFunc = map[string]ProviderJSONFunc{
 	"openstack":    openstack.OpenStackFromJSON,
 	"cloudstack":   cloudstack.CloudStackFromJSON,
 	"proxmox":      proxmox.ProxmoxFromJSON,
+	"solusvm":      solusvm.SolusVMFromJSON,
 	"lunanode":     lunanode.LunaNodeFromJSON,
 	"lobster":      lobster.LobsterFromJSON,
 	"ec2":          ec2.EC2FromJSON,
