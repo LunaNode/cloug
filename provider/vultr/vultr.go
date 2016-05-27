@@ -99,6 +99,13 @@ func (vt *Vultr) CreateInstance(instance *compute.Instance) (*compute.Instance, 
 		}
 		serverOptions.OS = snapshotOSID
 		serverOptions.Snapshot = imageParts[1]
+	} else if imageParts[0] == "app" {
+		appOSID, err := vt.findOSByName("Application")
+		if err != nil {
+			return nil, fmt.Errorf("failed to get application OS for creation from application: %v", err)
+		}
+		serverOptions.OS = appOSID
+		serverOptions.Application, _ = strconv.Atoi(imageParts[1])
 	} else {
 		return nil, fmt.Errorf("invalid image type " + imageParts[0])
 	}
@@ -254,6 +261,17 @@ func (vt *Vultr) ListImages() ([]*compute.Image, error) {
 		images = append(images, &compute.Image{
 			ID:   fmt.Sprintf("os:%d", os.ID),
 			Name: os.Name,
+		})
+	}
+
+	apps, err := vt.client.GetApplications()
+	if err != nil {
+		return nil, err
+	}
+	for _, app := range apps {
+		images = append(images, &compute.Image{
+			ID:   fmt.Sprintf("app:%d", app.ID),
+			Name: app.Name,
 		})
 	}
 
