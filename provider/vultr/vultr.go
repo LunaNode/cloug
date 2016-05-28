@@ -55,6 +55,10 @@ func (vt *Vultr) findRegion(str string) (int, error) {
 }
 
 func (vt *Vultr) CreateInstance(instance *compute.Instance) (*compute.Instance, error) {
+	if instance.PublicKey.ID == "" && len(instance.PublicKey.Key) > 0 {
+		return common.KeypairServiceCreateWrapper(vt, vt, instance)
+	}
+
 	imageID, err := common.GetMatchingImageID(vt, &instance.Image)
 	if err != nil {
 		return nil, err
@@ -108,6 +112,10 @@ func (vt *Vultr) CreateInstance(instance *compute.Instance) (*compute.Instance, 
 		serverOptions.Application, _ = strconv.Atoi(imageParts[1])
 	} else {
 		return nil, fmt.Errorf("invalid image type " + imageParts[0])
+	}
+
+	if instance.PublicKey.ID != "" {
+		serverOptions.SSHKey = instance.PublicKey.ID
 	}
 
 	region := DEFAULT_REGION
@@ -339,4 +347,35 @@ func (vt *Vultr) FindFlavor(flavor *compute.Flavor) (string, error) {
 		return "", fmt.Errorf("error listing flavors: %v", err)
 	}
 	return common.MatchFlavor(flavor, flavors), nil
+}
+
+func (vt *Vultr) ListPublicKeys() ([]*compute.PublicKey, error) {
+	keys, err := vt.client.GetSSHKeys()
+	if err != nil {
+		return nil, err
+	}
+	publicKeys := make([]*compute.PublicKey, len(keys))
+	for i, key := range keys {
+		publicKeys[i] = &compute.PublicKey{
+			ID:    key.ID,
+			Label: key.Name,
+			Key:   []byte(key.Key),
+		}
+	}
+	return publicKeys, nil
+}
+
+func (vt *Vultr) ImportPublicKey(key *compute.PublicKey) (*compute.PublicKey, error) {
+	return common.ImportPublicKeyWrapper(key, func(label string, key string) (string, error) {
+		vtKey, err := vt.client.CreateSSHKey(label, key)
+		if err != nil {
+			return "", err
+		} else {
+			return vtKey.ID, nil
+		}
+	})
+}
+
+func (vt *Vultr) RemovePublicKey(keyID string) error {
+	return vt.client.DeleteSSHKey(keyID)
 }
