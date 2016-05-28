@@ -129,6 +129,21 @@ func (e *EC2) CreateInstance(instance *compute.Instance) (*compute.Instance, err
 		}
 	}
 
+	if len(instance.PublicKey.Key) > 0 {
+		keyName := utils.Uid(8)
+		_, err := svc.ImportKeyPair(&ec2.ImportKeyPairInput{
+			KeyName:           aws.String(keyName),
+			PublicKeyMaterial: instance.PublicKey.Key,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to import public key: %v", err)
+		}
+		defer svc.DeleteKeyPair(&ec2.DeleteKeyPairInput{
+			KeyName: aws.String(keyName),
+		})
+		opts.KeyName = aws.String(keyName)
+	}
+
 	res, err := svc.RunInstances(&opts)
 	if err != nil {
 		return nil, err
