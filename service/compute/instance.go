@@ -7,8 +7,9 @@ type Instance struct {
 	IP        string
 	PrivateIP string
 
-	Image  Image
-	Flavor Flavor
+	Image     Image
+	Flavor    Flavor
+	PublicKey PublicKey
 
 	Status InstanceStatus
 
@@ -46,7 +47,7 @@ type InstanceAction struct {
 
 	// map of options from option value to description
 	// if nil, then this action can take any string value
-	Options     map[string]string
+	Options map[string]string
 
 	Func func(string) error
 }

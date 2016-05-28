@@ -57,3 +57,53 @@ func MatchFlavor(target *compute.Flavor, options []*compute.Flavor) string {
 
 	return ""
 }
+
+// Wraps VM creation with a raw SSH key for KeypairServices.
+// Calls ImportPublicKey, then CreateInstance, and finally RemovePublicKey.
+func KeypairServiceCreateWrapper(service compute.Service, keypair compute.KeypairService, instance *compute.Instance) (*compute.Instance, error) {
+	// wrapper should only be used if an instance is provided with a raw key
+	if instance.PublicKey.ID != "" {
+		return nil, fmt.Errorf("instance has non-empty public key ID, but service called wrapper")
+	} else if len(instance.PublicKey.Key) == 0 {
+		return nil, fmt.Errorf("instance does not specify a public key, but service called wrapper")
+	}
+
+	// proceed with import/create/remove operation
+	publicKey, err := keypair.ImportPublicKey(&instance.PublicKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to import public key: %v", err)
+	}
+	wrappedInstance := *instance
+	wrappedInstance.PublicKey = *publicKey
+	createdInstance, err := service.CreateInstance(&wrappedInstance)
+	keypair.RemovePublicKey(publicKey.ID)
+	return createdInstance, err
+}
+
+const DEFAULT_PUBLIC_KEY_LABEL = "cloug"
+
+func ImportPublicKeyWrapper(key *compute.PublicKey, f func(string, string) (string, error)) (*compute.PublicKey, error) {
+	if len(key.Key) == 0 {
+		return nil, fmt.Errorf("key content is empty")
+	}
+
+	label := key.Label
+	if label == "" {
+		label = DEFAULT_PUBLIC_KEY_LABEL
+	}
+
+	publicKey, err := utils.PublicKeyToAuthorizedKeysFormat(string(key.Key))
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert provided key to authorized_keys format: %v", err)
+	}
+
+	id, err := f(label, publicKey)
+	if err != nil {
+		return nil, err
+	}
+	return &compute.PublicKey{
+		ID:    id,
+		Label: label,
+		Key:   []byte(publicKey),
+	}, nil
+}

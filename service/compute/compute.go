@@ -73,3 +73,9 @@ type FlavorService interface {
 	ListFlavors() ([]*Flavor, error)
 	FindFlavor(flavor *Flavor) (string, error)
 }
+
+type KeypairService interface {
+	ListPublicKeys() ([]*PublicKey, error)
+	ImportPublicKey(key *PublicKey) (*PublicKey, error)
+	RemovePublicKey(keyID string) error
+}
