@@ -153,8 +153,9 @@ func (e *EC2) CreateInstance(instance *compute.Instance) (*compute.Instance, err
 	resInstance := res.Instances[0]
 
 	return &compute.Instance{
-		ID:     encodeID(String(resInstance.InstanceId), region),
-		Status: e.mapInstanceStatus(String(resInstance.State.Name)),
+		ID:       encodeID(String(resInstance.InstanceId), region),
+		Status:   e.mapInstanceStatus(String(resInstance.State.Name)),
+		Password: password,
 	}, nil
 }
 
