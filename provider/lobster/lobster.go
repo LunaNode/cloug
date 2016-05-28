@@ -94,6 +94,10 @@ func (this *Lobster) findMatchingPlan(ram int, storage int, cpu int) (*api.Plan,
 }
 
 func (lobster *Lobster) CreateInstance(instance *compute.Instance) (*compute.Instance, error) {
+	if instance.PublicKey.ID == "" && len(instance.PublicKey.Key) > 0 {
+		return common.KeypairServiceCreateWrapper(lobster, lobster, instance)
+	}
+
 	imageID, err := common.GetMatchingImageID(lobster, &instance.Image)
 	if err != nil {
 		return nil, err
@@ -117,7 +121,15 @@ func (lobster *Lobster) CreateInstance(instance *compute.Instance) (*compute.Ins
 		name = DEFAULT_NAME
 	}
 
-	vmID, err := lobster.client.VmCreate(name, flavorIDInt, imageIDInt)
+	var clientOptions api.VmCreateOptions
+	if instance.PublicKey.ID != "" {
+		clientOptions.KeyId, err = strconv.Atoi(instance.PublicKey.ID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid key ID: %s", instance.PublicKey.ID)
+		}
+	}
+
+	vmID, err := lobster.client.VmCreate(name, flavorIDInt, imageIDInt, &clientOptions)
 	if err != nil {
 		return nil, err
 	} else {
@@ -422,4 +434,39 @@ func (lobster *Lobster) FindFlavor(flavor *compute.Flavor) (string, error) {
 		return "", fmt.Errorf("error listing flavors: %v", err)
 	}
 	return common.MatchFlavor(flavor, flavors), nil
+}
+
+func (lobster *Lobster) ListPublicKeys() ([]*compute.PublicKey, error) {
+	keys, err := lobster.client.KeyList()
+	if err != nil {
+		return nil, err
+	}
+	publicKeys := make([]*compute.PublicKey, len(keys))
+	for i, key := range keys {
+		publicKeys[i] = &compute.PublicKey{
+			ID:    strconv.Itoa(key.Id),
+			Label: key.Name,
+			Key:   []byte(key.Key),
+		}
+	}
+	return publicKeys, nil
+}
+
+func (lobster *Lobster) ImportPublicKey(key *compute.PublicKey) (*compute.PublicKey, error) {
+	return common.ImportPublicKeyWrapper(key, func(label string, key string) (string, error) {
+		id, err := lobster.client.KeyAdd(label, key)
+		if err != nil {
+			return "", err
+		} else {
+			return strconv.Itoa(id), nil
+		}
+	})
+}
+
+func (lobster *Lobster) RemovePublicKey(keyID string) error {
+	id, err := strconv.Atoi(keyID)
+	if err != nil {
+		return fmt.Errorf("invalid key ID")
+	}
+	return lobster.client.KeyRemove(id)
 }
