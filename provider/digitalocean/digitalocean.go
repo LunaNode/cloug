@@ -122,6 +122,10 @@ func (do *DigitalOcean) imageID(image *compute.Image) (int, error) {
 }
 
 func (do *DigitalOcean) CreateInstance(instance *compute.Instance) (*compute.Instance, error) {
+	if instance.PublicKey.ID == "" && len(instance.PublicKey.Key) > 0 {
+		return common.KeypairServiceCreateWrapper(do, do, instance)
+	}
+
 	imageID, err := do.imageID(&instance.Image)
 	if err != nil {
 		return nil, err
@@ -155,6 +159,16 @@ func (do *DigitalOcean) CreateInstance(instance *compute.Instance) (*compute.Ins
 
 	if createRequest.Region == "" {
 		createRequest.Region = DEFAULT_REGION
+	}
+
+	if instance.PublicKey.ID != "" {
+		keyID, err := strconv.Atoi(instance.PublicKey.ID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid key ID")
+		}
+		createRequest.SSHKeys = []godo.DropletCreateSSHKey{godo.DropletCreateSSHKey{
+			ID: keyID,
+		}}
 	}
 
 	droplet, _, err := do.client.Droplets.Create(createRequest)
@@ -439,4 +453,43 @@ func (do *DigitalOcean) FindFlavor(flavor *compute.Flavor) (string, error) {
 	} else {
 		return fmt.Sprintf("%dgb", flavor.MemoryMB/1024), nil
 	}
+}
+
+func (do *DigitalOcean) ListPublicKeys() ([]*compute.PublicKey, error) {
+	keys, _, err := do.client.Keys.List(&godo.ListOptions{PerPage: 500})
+	if err != nil {
+		return nil, err
+	}
+	publicKeys := make([]*compute.PublicKey, len(keys))
+	for i, key := range keys {
+		publicKeys[i] = &compute.PublicKey{
+			ID:    strconv.Itoa(key.ID),
+			Label: key.Name,
+			Key:   []byte(key.PublicKey),
+		}
+	}
+	return publicKeys, nil
+}
+
+func (do *DigitalOcean) ImportPublicKey(key *compute.PublicKey) (*compute.PublicKey, error) {
+	return common.ImportPublicKeyWrapper(key, func(label string, key string) (string, error) {
+		doKey, _, err := do.client.Keys.Create(&godo.KeyCreateRequest{
+			Name:      label,
+			PublicKey: key,
+		})
+		if err != nil {
+			return "", err
+		} else {
+			return strconv.Itoa(doKey.ID), nil
+		}
+	})
+}
+
+func (do *DigitalOcean) RemovePublicKey(keyID string) error {
+	id, err := strconv.Atoi(keyID)
+	if err != nil {
+		return fmt.Errorf("invalid key ID")
+	}
+	_, err = do.client.Keys.DeleteByID(id)
+	return err
 }
