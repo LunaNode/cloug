@@ -1,0 +1,31 @@
+Cloug
+=====
+
+Cloug is a Golang library that abstracts multiple cloud APIs so that users can
+interact with different cloud service providers via a single API. Supported
+providers include both software and specific platforms:
+
+* OpenStack
+* CloudStack
+* Proxmox
+* SolusVM
+* Luna Node
+* Digital Ocean
+* AWS EC2
+* Linode
+* Vultr
+
+Currently, support is limited to compute services.
+
+For an example use of Cloug, see https://github.com/LunaNode/lobster/blob/master/vmi/cloug/cloug.go
+
+Contributing
+------------
+
+The Cloug project uses Github for coordination.
+
+URL: https://github.com/LunaNode/cloug
+
+Note that per the Apache license, any contribution you submit for inclusion in
+Lobster shall be under the terms of the Apache license. See Section 5 of the
+Apache License Version 2.0 for details.
