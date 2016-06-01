@@ -3,7 +3,10 @@ package utils
 import "crypto/rand"
 
 func Uid(l int) string {
-	alphabet := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	return UidAlphabet(l, []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
+}
+
+func UidAlphabet(l int, alphabet []rune) string {
 	bytes := make([]byte, l)
 	_, err := rand.Read(bytes)
 	if err != nil {
