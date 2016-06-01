@@ -79,8 +79,10 @@ func (vt *Vultr) CreateInstance(instance *compute.Instance) (*compute.Instance, 
 	}
 
 	serverOptions := &vultr.ServerOptions{
-		PrivateNetworking: true,
-		IPV6:              true,
+		PrivateNetworking:    instance.Detail("private_networking", "yes") == "yes",
+		IPV6:                 instance.Detail("ipv6", "yes") == "yes",
+		AutoBackups:          instance.Detail("auto_backups", "no") == "yes",
+		DontNotifyOnActivate: instance.Detail("dont_notify_on_activate", "no") == "yes",
 	}
 
 	imageParts := strings.SplitN(imageID, ":", 2)

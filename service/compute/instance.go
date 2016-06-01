@@ -34,6 +34,15 @@ type Instance struct {
 	Actions []InstanceAction
 }
 
+func (instance *Instance) Detail(k string, d string) string {
+	v, ok := instance.Details[k]
+	if ok {
+		return v
+	} else {
+		return d
+	}
+}
+
 type InstanceStatus string
 
 const (
