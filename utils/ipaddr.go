@@ -1,8 +1,6 @@
 package utils
 
-import "fmt"
 import "net"
-import "strings"
 
 var privateNetworks []*net.IPNet
 
@@ -43,55 +41,4 @@ func GetIPVersion(ipString string) int {
 	} else {
 		return 6
 	}
-}
-
-func ParseCIDROrIP(s string) *net.IPNet {
-	// first try as network
-	_, network, err := net.ParseCIDR(s)
-	if err == nil {
-		return network
-	}
-
-	// else try as IP
-	_, network, err = net.ParseCIDR(s + "/32")
-	if err == nil {
-		return network
-	} else {
-		return nil
-	}
-}
-
-func ParseNetworks(s string) ([]*net.IPNet, error) {
-	var networks []*net.IPNet
-	for _, part := range strings.Split(s, ",") {
-		part = strings.TrimSpace(part)
-		if part != "" {
-			network := ParseCIDROrIP(s)
-			if network != nil {
-				networks = append(networks, network)
-			} else {
-				return nil, fmt.Errorf("failed to parse \"%s\" as IP/CIDR", part)
-			}
-		}
-	}
-	return networks, nil
-}
-
-func MatchNetworks(netString string, ipString string) bool {
-	ip := net.ParseIP(ipString)
-	if ip == nil {
-		return false
-	}
-
-	networks, err := ParseNetworks(netString)
-	if err != nil {
-		return false
-	}
-
-	for _, network := range networks {
-		if network.Contains(ip) {
-			return true
-		}
-	}
-	return false
 }
