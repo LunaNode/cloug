@@ -53,7 +53,7 @@ type VmInfoResponse struct {
 // image
 
 type Image struct {
-	ID     string `json:"image_id"`
+	ID     int    `json:"image_id,string"`
 	Name   string `json:"name"`
 	Status string `json:"status"`
 	Size   string `json:"size"`
@@ -69,13 +69,13 @@ type ImageDetailsResponse struct {
 }
 
 type ImageCreateResponse struct {
-	ID string `json:"image_id"`
+	ID int `json:"image_id,string"`
 }
 
 // volumes
 
 type Volume struct {
-	ID     string `json:"id"`
+	ID     int    `json:"id,string"`
 	Name   string `json:"name"`
 	Size   string `json:"size"`
 	Region string `json:"region"`
@@ -91,13 +91,13 @@ type VolumeInfoResponse struct {
 }
 
 type VolumeCreateResponse struct {
-	ID string `json:"volume_id"`
+	ID int `json:"volume_id,string"`
 }
 
 // plans
 
 type Plan struct {
-	ID        string `json:"plan_id"`
+	ID        int    `json:"plan_id,string"`
 	Name      string `json:"name"`
 	Vcpu      string `json:"vcpu"`
 	Price     string `json:"price"`
